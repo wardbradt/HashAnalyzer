@@ -20,7 +20,7 @@ public class HeatMap<T> {
 
     public HeatMap(PriorityHashTable<T> table) {
         this.table = table;
-        this.heatMap = getRawHeatMap(table);
+        this.heatMap = makeRawHeatMap(table);
     }
 
     /**
@@ -72,7 +72,7 @@ public class HeatMap<T> {
      * @param hashTable
      * @return a HashMap representation of <code>PriorityHashTable</code> hashTable
      */
-    public static HashMap<Integer, Integer> getRawHeatMap(PriorityHashTable hashTable) {
+    public static HashMap<Integer, Integer> makeRawHeatMap(PriorityHashTable hashTable) {
         PriorityQueue<HashLinkedList> queue = hashTable.getQueue();
         HashMap<Integer, Integer> result = new HashMap<>();
         if (queue.isEmpty()) return result;
@@ -85,5 +85,17 @@ public class HeatMap<T> {
 
         queue.addAll(queueCopy);
         return result;
+    }
+
+    public String toString() {
+        return heatMap.toString();
+    }
+
+    public int size() {
+        return heatMap.size();
+    }
+
+    public HashMap<Integer, Integer> getHeatMap() {
+        return heatMap;
     }
 }

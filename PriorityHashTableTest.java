@@ -45,9 +45,4 @@ public class PriorityHashTableTest {
         assertNotEquals(3, addTester.getSmallestHash());
         assertEquals(6, addTester.getLargestHash());
     }
-
-    @Test
-    public void testIterator() {
-
-    }
 }

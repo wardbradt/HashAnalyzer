@@ -19,7 +19,7 @@ public class HeatMapTest {
         heatMapTester.add(5);
         heatMapTester.add(4);
 
-        HashMap<Integer, Integer> mapTest = HeatMap.getRawHeatMap(heatMapTester);
+        HashMap<Integer, Integer> mapTest = HeatMap.makeRawHeatMap(heatMapTester);
 
         assertEquals(new Integer(3), mapTest.get(5));
         assertEquals(new Integer(2), mapTest.get(4));
