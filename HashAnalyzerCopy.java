@@ -1,3 +1,5 @@
+import helperstructures.LinkedList;
+
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -36,7 +38,7 @@ public class HashAnalyzerCopy {
 
     /**
      * Generates 1024 instances of analyzedClass objectss using a constructor specified by the constructor
-     * parameter then returns a <code>LinkedList</code> of those <code>INSTANCE_AMOUNT</code> analyzedClass
+     * parameter then returns a <code>helperstructures.LinkedList</code> of those <code>INSTANCE_AMOUNT</code> analyzedClass
      * <code>Object</code>s, typically to be used by hashReport. I think using two different methods might be slightly
      * inefficient because we must traverse over 1024 not once, but twice.
      *
@@ -46,12 +48,12 @@ public class HashAnalyzerCopy {
      *               be found in <code>HashAnalyzerTest.java</code>.
      * @return a <code>LinkedLis</code>t of 1024 random objects of class analyzedClass.
      */
-    public LinkedList<Object> generateRandomTable(Constructor<?> constructor, int[] ranges) {
+    public helperstructures.LinkedList<Object> generateRandomTable(Constructor<?> constructor, int[] ranges) {
         // The parameter types for constructor.
         Class<?>[] paramTypes = constructor.getParameterTypes();
 
         // The length of result will be 1024 and will hold all random instances.
-        LinkedList<Object> result = new LinkedList<>();
+        helperstructures.LinkedList<Object> result = new helperstructures.LinkedList<>();
 
         for (int i = 0; i < INSTANCE_AMOUNT; i++) {
             // This is an array of the random instantations of each parameter.
@@ -88,9 +90,9 @@ public class HashAnalyzerCopy {
      *
      * @param ranges the ranges of each parameter for each constructor. Examples of how to use this can
      *               be found in HashAnalyzerTest.java.
-     * @return a LinkedList of 1024 random objects of class analyzedClass.
+     * @return a helperstructures.LinkedList of 1024 random objects of class analyzedClass.
      */
-   public LinkedList<Object> generateRandomTable(int[][] ranges) {
+   public helperstructures.LinkedList<Object> generateRandomTable(int[][] ranges) {
        // The public constructors in Class c
        Constructor<?>[] publicConstructors = analyzedClass.getConstructors();
        // How many Objects we will instantiate using each constructor - Might
@@ -102,7 +104,7 @@ public class HashAnalyzerCopy {
        Class<?>[] paramTypes = publicConstructors[conIndex].getParameterTypes();
 
        // The length of result will be 1024 and will hold all random instances.
-       LinkedList<Object> result = new LinkedList<>();
+       helperstructures.LinkedList<Object> result = new helperstructures.LinkedList<>();
 
        for (int i = 0; i < INSTANCE_AMOUNT; i++) {
            // Note: I think we are saving runTime by only updating paramTypes every time
@@ -137,17 +139,13 @@ public class HashAnalyzerCopy {
        return result;
    }
 
-   public void hashReport() {
-
-   }
-
     /**
      * Generates a hash report for the objects in randoms.
      * Beware: Will clear all of hashTable's current elements.
      *
-     * @param randoms a LinkedList of Objects that we will use to create the HashReport.
+     * @param randoms a helperstructures.LinkedList of Objects that we will use to create the HashReport.
      */
-    public void hashReport(LinkedList<Object> randoms){
+    public void hashReport(helperstructures.LinkedList<Object> randoms){
         hashTable = new PriorityQueue<>();
         long averageHash = 0;
         for (int i = 0; i < randoms.size(); i++) {
@@ -686,7 +684,7 @@ public class HashAnalyzerCopy {
      * randomized objects and see the hash report!
      */
     public void analyze() {
-        LinkedList<Object> randoms = generateRandomTable(constructors[0], parameterRanges);
+        helperstructures.LinkedList<Object> randoms = generateRandomTable(constructors[0], parameterRanges);
         hashReport(randoms);
     }
 
