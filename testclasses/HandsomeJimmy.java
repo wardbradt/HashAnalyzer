@@ -1,3 +1,5 @@
+package testclasses;
+
 public class HandsomeJimmy extends StandardHasher {
   private int handsomeness;
 
