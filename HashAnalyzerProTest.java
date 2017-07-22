@@ -48,8 +48,8 @@ public class HashAnalyzerProTest {
 ////        hashes.add(36);
 ////
 ////        for (int i = 0; i < hashes.size(); i++) {
-////            // Each LinkedList will have 3-15 objects (that share the same hash code && will normally be random).
-////            // The 1st element of every LinkedList will be between 2 and 31.
+////            // Each helperstructures.LinkedList will have 3-15 objects (that share the same hash code && will normally be random).
+////            // The 1st element of every helperstructures.LinkedList will be between 2 and 31.
 ////
 ////            HashLinkedList<Object> added = new HashLinkedList<>(hashes.get(i));
 ////            for (int a = 0; a < 2 + (int)(Math.random() * 10); a++) {

@@ -1,6 +1,8 @@
+package helperstructures;
+
 /**
  * Created by wardbradt on 7/19/17.
- * Taken from Stack Overflow
+ * Taken from helperstructures.Stack Overflow
  */
 public class Tuple<X, Y> {
     public final X x;

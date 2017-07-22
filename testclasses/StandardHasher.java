@@ -1,3 +1,5 @@
+package testclasses;
+
 import java.lang.reflect.Field;
 
 public abstract class StandardHasher {

@@ -1,4 +1,6 @@
 import static org.junit.Assert.*;
+
+import helperstructures.LinkedList;
 import org.junit.Test;
 import java.util.ArrayList;
 

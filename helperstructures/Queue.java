@@ -1,4 +1,4 @@
-/**
+package helperstructures; /**
  * Created by wardbradt on 4/6/17.
  */
 import java.util.Iterator;

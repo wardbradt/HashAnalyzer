@@ -1,3 +1,5 @@
+import helperstructures.LinkedList;
+
 import java.util.ArrayList;
 
 /**

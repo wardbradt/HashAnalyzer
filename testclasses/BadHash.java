@@ -1,3 +1,5 @@
+package testclasses;
+
 /**
  * Created by Ward Bradt on 5/8/17.
  * An example class that demonstrates a bad hashCode() function

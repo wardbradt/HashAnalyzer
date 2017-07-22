@@ -1,7 +1,9 @@
+import helperstructures.LinkedList;
+
 /**
  * Created by Ward Bradt on 5/3/17.
  * Helper class for <code>HashAnalyzer.java</code>
- * A data structures that stores a <code>LinkedList</code> of <code>Object</code>s of the same class whose
+ * A data structures that stores a <code>helperstructures.LinkedList</code> of <code>Object</code>s of the same class whose
  * <code>hashCode()</code> method returns the same value. The head node of the HashedLinkedList is the hash code
  * that all other <code>Object</code>s in the <code>HashedLinkedList</code> share.
  */

@@ -1,5 +1,7 @@
+package helperstructures;
+
 /**
- * A basic implementation of a LinkedList slightly repurposed to be the superclass of a Queue.
+ * A basic implementation of a helperstructures.LinkedList slightly repurposed to be the superclass of a helperstructures.Queue.
  * Note that the generic type `T` is being used here.
  *
  * <p>
@@ -26,7 +28,7 @@ public class LinkedList<T> {
      * Add the given object to the end of the linked list.
      * <i>If the linked list is of size '1' and its only
      * node has no data, the given object will be inserted
-     * at index 0, and the LinkedList's size will remain
+     * at index 0, and the helperstructures.LinkedList's size will remain
      * the same.</i>
      *
      * @param o the object to add
@@ -87,7 +89,7 @@ public class LinkedList<T> {
         for (int traversed = 1; traversed < index; traversed++) { // traversed starts at '1', because we have already traversed the first node
             // if index > size()
             if (node.getNext() == null) {
-                throw new IndexOutOfBoundsException("The given index is outside the bounds of the LinkedList.");
+                throw new IndexOutOfBoundsException("The given index is outside the bounds of the helperstructures.LinkedList.");
             }
             node = node.getNext();
         }
@@ -102,14 +104,14 @@ public class LinkedList<T> {
      *
      * @param index the index of the requested object
      * @return the requested object
-     * @throws IndexOutOfBoundsException if outside the bounds of the LinkedList
+     * @throws IndexOutOfBoundsException if outside the bounds of the helperstructures.LinkedList
      */
     public T get(int index) throws IllegalArgumentException {
         if (index < 0) throw new IndexOutOfBoundsException("No negative indices!");
         LinkedList<T> requestedNode = this;
         for (int traversed = 0; traversed < index; traversed++) {
             if (requestedNode.getNext() == null) {
-                throw new IndexOutOfBoundsException("The given index is outside the bounds of the LinkedList.");
+                throw new IndexOutOfBoundsException("The given index is outside the bounds of the helperstructures.LinkedList.");
             }
             requestedNode = requestedNode.getNext();
         }
@@ -120,7 +122,7 @@ public class LinkedList<T> {
      * Check whether the linked list contains the given object.
      *
      * @param object the object to search for
-     * @return whether or not the given object is in the LinkedList
+     * @return whether or not the given object is in the helperstructures.LinkedList
      */
     public boolean contains(T object) {
         // indexOf returns -1 if T object is not found in this.
@@ -172,7 +174,7 @@ public class LinkedList<T> {
     }
 
     /**
-     * Removes the given node from the LinkedList.
+     * Removes the given node from the helperstructures.LinkedList.
      * Previous and later nodes remain intact, however
      * later nodes indices will drop by 1 (because
      * there is one less node before them).
@@ -199,7 +201,7 @@ public class LinkedList<T> {
         while (iteratingNodeIndex < index) {
             if (iteratingNode.getNext() == null) {
                 throw new IndexOutOfBoundsException("No such index!");
-                // throw a new illegal argument exception, because the LinkedList 'chain' does not have such an node
+                // throw a new illegal argument exception, because the helperstructures.LinkedList 'chain' does not have such an node
             }
             previousNode = iteratingNode;
             iteratingNode = iteratingNode.getNext();
@@ -231,9 +233,9 @@ public class LinkedList<T> {
     }
 
     /**
-     * Get the number of nodes in the LinkedList.
+     * Get the number of nodes in the helperstructures.LinkedList.
      *
-     * @return the number of nodes in the LinkedList
+     * @return the number of nodes in the helperstructures.LinkedList
      */
     public int size() {
         int nodes = 1; // start at 1, because the host object will always be a node

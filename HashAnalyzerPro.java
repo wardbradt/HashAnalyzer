@@ -1,5 +1,6 @@
 import java.lang.reflect.*;
 import java.util.*;
+import weka.core.*;
 
 /**
  * Created by wardbradt on 7/9/17.
@@ -9,11 +10,14 @@ public class HashAnalyzerPro<T> {
     private final int INSTANCE_AMOUNT = 1024;
     private Constructor constructor;
     private int[] parameterRanges;
-//    private Class<?> analyzedClass;
+    private ArrayList<Attribute> attributes;
+    private Instances data;
 
     public HashAnalyzerPro(Class c, int[] r) {
         table = new PriorityHashTable<>();
         constructor = c.getConstructors()[0];
+        attributes = createAttributes(constructor.getParameterTypes());
+        data = new Instances("MyRelation", attributes, 0);
         parameterRanges = r;
     }
 
@@ -22,12 +26,6 @@ public class HashAnalyzerPro<T> {
                 constructor.getDeclaringClass().getSimpleName()  + " " +
                 "object is " + populateTable() + " nanoseconds.\n");
         System.out.println(heatMap());
-//        int rows = 1;
-//        String tempHeat = heatMap;
-//        while (tempHeat.indexOf("\n") > -1) {
-//            rows++;
-//            tempHeat = tempHeat.substring(tempHeat.indexOf("\n") + 1);
-//        }
     }
 
     public String heatMap(int rows) {
@@ -60,10 +58,8 @@ public class HashAnalyzerPro<T> {
     /**
      * Populates <code>PriorityHashTable<T> table</code> with random instantiations using the
      * <code>generateRandomInstance(Class<?>[] paramTypes)</code> helper method.
+     *
      * @return the average time it takes to hash a random instantiation of the given <code>class</code>
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws InvocationTargetException
      */
     public long populateTable() throws InstantiationException, IllegalAccessException, InvocationTargetException{
         // The parameter types for constructor.
@@ -71,20 +67,29 @@ public class HashAnalyzerPro<T> {
 
         long averageHashTime = 0;
         for (int i = 0; i < INSTANCE_AMOUNT; i++) {
-            averageHashTime += table.add(generateRandomInstance(paramTypes));
+            Object[] paramValues = fillParameterArray(paramTypes);
+            averageHashTime += table.add(generateRandomInstance(paramValues));
         }
         return averageHashTime / (long)INSTANCE_AMOUNT;
     }
 
-    public T generateRandomInstance(Class<?>[] paramTypes) throws InstantiationException,
-            IllegalAccessException, InvocationTargetException {
-        // Todo: How to see if a variable is an int/double/boolean/ etc.
-        // Todo: make recursive
-        return generateRandomInstance(fillParameterArray(paramTypes));
-    }
+//    /**
+//     * Generates a randomized instance of a <code>T</code> object given a <code>Class<?>[]</code> of the parameter
+//     * types of the class <code>T</code>'s constructor
+//     * @param paramTypes an array of parameter types for <code>T</code>'s constructor
+//     *
+//     * @return a randomized instance of a <code>T</code> object
+//     */
+//    public T generateRandomInstance(Class<?>[] paramTypes) throws InstantiationException,
+//            IllegalAccessException, InvocationTargetException {
+//        // Todo: How to see if a variable is an int/double/boolean/ etc.
+//        // Todo: make recursive
+//        return generateRandomInstance(fillParameterArray(paramTypes));
+//    }
 
     public T generateRandomInstance(Object[] randomParams) throws InstantiationException,
-            IllegalAccessException, InvocationTargetException{
+            IllegalAccessException, InvocationTargetException {
+
         return (T)constructor.newInstance(randomParams);
     }
 
@@ -96,10 +101,26 @@ public class HashAnalyzerPro<T> {
      */
     private Object[] fillParameterArray(Class<?>[] paramTypes) {
         Object[] randomParams = new Object[paramTypes.length];
+
+        Instance inst = new DenseInstance(data.numAttributes());
         for (int b = 0; b < randomParams.length; b++) {
             // Create the random parameter Object.
             randomParams[b] = (new ParamBounds()).generate(parameterRanges[b*2], parameterRanges[b*2+1], paramTypes[b]);
+
+            Class<?> paramClass = randomParams[b].getClass();
+            if (paramClass.equals(boolean.class)) {
+                if ((boolean)randomParams[b]) {
+                    inst.setValue(b, 0);
+                } else {
+                    inst.setValue(b, 1);
+                }
+            } else if (paramClass.equals(String.class) || paramClass.equals(char.class)) {
+                inst.setValue(b, data.attribute(b).addStringValue((String)randomParams[b]));
+            } else {
+                inst.setValue(b, (double)randomParams[b]);
+            }
         }
+
         return randomParams;
     }
 
@@ -113,10 +134,11 @@ public class HashAnalyzerPro<T> {
     public String avalancheEffectAnalysis() throws IllegalAccessException, InvocationTargetException,
             InstantiationException {
         String result = "";
+        Class<?>[] paramTypes = constructor.getParameterTypes();
 
         for (int a = 0; a < INSTANCE_AMOUNT; a++) {
             // create the random parameters we will use to instantiate on this iteration
-            Object[] randomParams = fillParameterArray(constructor.getParameterTypes());
+            Object[] randomParams = fillParameterArray(paramTypes);
             // instantiate a T Object using randomParams as the parameters for the constructor
             T randomInstance = generateRandomInstance(randomParams);
 
@@ -233,6 +255,41 @@ public class HashAnalyzerPro<T> {
 
     public String continuityAnalysis() {
         String result = "";
+        return result;
+    }
+
+    /**
+     * Creates an <code>ArrayList<Attribute></code> given a <code>Class<?>[]</code>
+     * @param arr an <code>Class<?>[]</code> filled with the <code>class</code> types of parameters of a constructor
+     *
+     * @return an <code>ArrayList<Attribute></code> given a <code>Class<?>[]</code>
+     */
+    public static ArrayList<Attribute> createAttributes(Class<?>[] arr) {
+        ArrayList<Attribute> result = new ArrayList<>();
+
+        for (int i = 0; i < arr.length; i++) {
+            Class<?> objClass = arr[i].getClass();
+            // boolean == only primitive nominal attribute
+            if (objClass.equals(boolean.class)) {
+                ArrayList<String> booleanNames = new ArrayList<>();
+                booleanNames.add("true");
+                booleanNames.add("false");
+                result.add(new Attribute("att" + i, booleanNames));
+                break;
+            }
+            // char and string == string attribute
+            else if (objClass.equals(String.class) || objClass.equals(char.class)) {
+                result.add(new Attribute("att" + i, (ArrayList<String>) null));
+                break;
+            }
+            // int, double, float, long, short, or byte == numeric attribute
+            else {
+                result.add(new Attribute("att" + i));
+            }
+            throw new IllegalArgumentException();
+        }
+        result.add(new Attribute("hashcode"));
+
         return result;
     }
 

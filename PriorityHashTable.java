@@ -1,6 +1,6 @@
 import java.util.*;
 /**
- * Created by wardbradt on 7/9/17.
+ * Created by Ward Bradt on 7/9/17.
  * Wrapper class for PriorityQueue of HLLs basically
  */
 public class PriorityHashTable<T> {

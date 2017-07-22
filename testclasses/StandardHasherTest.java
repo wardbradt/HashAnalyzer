@@ -1,5 +1,9 @@
+package testclasses;
+
+import helperstructures.LinkedList;
 import org.junit.Test;
 import org.junit.Before;
+import testclasses.HandsomeJimmy;
 
 import java.lang.reflect.ParameterizedType;
 
