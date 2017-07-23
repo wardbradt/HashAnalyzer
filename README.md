@@ -2,8 +2,8 @@
 Analyzes the `hashcode()` function of a Java `class` with random instantiation and data analysis.
 
 ## Random Initialization
-HashAnalyzer randomly generates instances of a given `class` using the [RandomInstanceGenerator](https://github.com/wardbradt/HashAnalyzer/blob/master/RandomInstanceGenerator.java) and closely related [RandomGenerator](https://github.com/wardbradt/HashAnalyzer/blob/master/RandomInstance.java) classes. 
-However, the techniques that these two classes use are restrictive upon the types of classes that can be instantied; I hope to soon use the currently-in-beta [Random Generator](https://github.com/wardbradt/HashAnalyzer/blob/master/RandomGenerator.java) class. Both of these "random instantiation techniques" function primarily thanks to  [Java Reflection](https://docs.oracle.com/javase/tutorial/reflect/).
+HashAnalyzer randomly generates instances of a given `class` using the [RandomInstanceGenerator](https://github.com/wardbradt/HashAnalyzer/blob/master/RandomInstanceGenerator.java) and closely related [RandomInstance](https://github.com/wardbradt/HashAnalyzer/blob/master/RandomInstance.java) classes along with the sibling [WekaRandomInstanceGenerator](https://github.com/wardbradt/HashAnalyzer/blob/master/WekaRandomInstanceGenerator.java) and [WekaRandomInstance](https://github.com/wardbradt/HashAnalyzer/blob/master/WekaRandomInstance.java) classes. 
+However, the techniques that these two classes use are restrictive upon the types of classes that can be instantied; I hope to soon use the currently-in-beta [RandomGenerator](https://github.com/wardbradt/HashAnalyzer/blob/master/RandomGenerator.java) class. Both of these "random instantiation techniques" function primarily thanks to  [Java Reflection](https://docs.oracle.com/javase/tutorial/reflect/).
 
 HashAnalyzer currently instantiates `Object`s of a given class given the parameters of instantiation for each parameter in the constructor.
 Currently, the HashAnalyzer can only analyze and instantiate `Object`s whose constructor exclusively contains primitive types (`int`,
