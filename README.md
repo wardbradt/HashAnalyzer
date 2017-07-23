@@ -2,8 +2,10 @@
 Analyzes the `hashcode()` function of a Java `class` with random instantiation and data analysis.
 
 ## Random Initialization
-Using a still under-development/ beta software that primarily functions using [Java Reflection](https://docs.oracle.com/javase/tutorial/reflect/),
-HashAnalyzer randomly instantiates `Object`s of a given class given the parameters of instantiation for each parameter in the constructor.
+HashAnalyzer randomly generates instances of a given `class` using the [RandomInstanceGenerator](https://github.com/wardbradt/HashAnalyzer/blob/master/RandomInstanceGenerator.java) and closely related [RandomGenerator](https://github.com/wardbradt/HashAnalyzer/blob/master/RandomInstance.java) classes. 
+However, the techniques that these two classes use are restrictive upon the types of classes that can be instantied; I hope to soon use the currently-in-beta [Random Generator](https://github.com/wardbradt/HashAnalyzer/blob/master/RandomGenerator.java) class. Both of these "random instantiation techniques" function primarily thanks to  [Java Reflection](https://docs.oracle.com/javase/tutorial/reflect/).
+
+HashAnalyzer currently instantiates `Object`s of a given class given the parameters of instantiation for each parameter in the constructor.
 Currently, the HashAnalyzer can only analyze and instantiate `Object`s whose constructor exclusively contains primitive types (`int`,
 `double`, `float`, `long`, `byte`, `short`, `char`, or `boolean`) or `String`s.
 
@@ -24,4 +26,4 @@ parameters used to initialize each `Object`. Then uses frequency analysis on the
 [ ] Weigh the frequency of the randomly-generated parameters against the frequency analysis (possibly after classification) for
 a more accurate and less biased frequency analysis
 
-[ ] Create a recursive random instantiation class/method where the base case is if a parameter is primitive to allow inspection of `Object`s of any `class`.
+[X] Create a recursive random instantiation class/method where the base case is if a parameter is primitive to allow inspection of `Object`s of any `class`.
