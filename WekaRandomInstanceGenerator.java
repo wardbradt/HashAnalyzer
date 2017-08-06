@@ -17,7 +17,7 @@ import java.io.FileWriter;
 public class WekaRandomInstanceGenerator<T> {
     Class<?> cls;
     private Constructor constructor;
-    int[] parameterRanges;
+    private int[] parameterRanges;
     private Instances data;
     private ArrayList<Attribute> attributes;
     public final static ArrayList<String> BOOLEAN_NAMES = new ArrayList<>(Arrays.asList("true", "false"));
@@ -30,6 +30,7 @@ public class WekaRandomInstanceGenerator<T> {
         // initialize attributes and data
         attributes = createAttributes(constructor.getParameterTypes());
         data = new Instances("MyRelation", attributes, 0);
+        // later: is this line necessary?
         data.setClassIndex(data.numAttributes() - 1);
     }
 
@@ -77,18 +78,16 @@ public class WekaRandomInstanceGenerator<T> {
         writer.close();
     }
 
-//    public static void instancesToArff(Instances dataSet) throws IOException {
-//        BufferedWriter writer = new BufferedWriter(new FileWriter("./data/test.arff"));
-//        writer.write(dataSet.toString());
-//        writer.flush();
-//        writer.close();
-//    }
-
     public ArrayList<Attribute> getAttributes() {
         return attributes;
     }
 
     public Instances getData() {
         return data;
+    }
+
+    public void clearData() {
+        data = new Instances("MyRelation", attributes, 0);
+        data.setClassIndex(data.numAttributes() - 1);
     }
 }

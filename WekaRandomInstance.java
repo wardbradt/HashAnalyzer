@@ -12,7 +12,7 @@ public class WekaRandomInstance<T> {
 
     public WekaRandomInstance(Class<?> cls, int[] ranges, Instances dataSet) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         constructor = cls.getConstructors()[0];
-        this.parameterRanges = ranges;
+        parameterRanges = ranges;
         instance = new DenseInstance(constructor.getParameterCount() + 1);
         instance.setDataset(dataSet);
         init();
@@ -42,6 +42,7 @@ public class WekaRandomInstance<T> {
         }
 
         contents = (T)constructor.newInstance(parameterValues);
+        // the last value in the dataset is the hashcode for this instance
         instance.setValue(instance.numAttributes()-1, contents.hashCode());
     }
 
@@ -62,6 +63,10 @@ public class WekaRandomInstance<T> {
         }
 
         return randomParams;
+    }
+
+    public Object[] getParameterValues() {
+        return parameterValues;
     }
 
     public Instance getInstance() {

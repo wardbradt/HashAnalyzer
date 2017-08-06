@@ -11,13 +11,13 @@ public class HashAnalyzerPro<T> {
     private Constructor constructor;
     private int[] parameterRanges;
     private ArrayList<Attribute> attributes;
-    private Instances data;
+    private WekaRandomInstanceGenerator<T> wekaRandomInstanceGenerator;
 
     public HashAnalyzerPro(Class c, int[] r) {
         table = new PriorityHashTable<>();
         constructor = c.getConstructors()[0];
         attributes = createAttributes(constructor.getParameterTypes());
-        data = new Instances("MyRelation", attributes, 0);
+        wekaRandomInstanceGenerator = new WekaRandomInstanceGenerator<>(c, r);
         parameterRanges = r;
     }
 
@@ -61,67 +61,19 @@ public class HashAnalyzerPro<T> {
      *
      * @return the average time it takes to hash a random instantiation of the given <code>class</code>
      */
-    public long populateTable() throws InstantiationException, IllegalAccessException, InvocationTargetException{
-        // The parameter types for constructor.
-        Class<?>[] paramTypes = constructor.getParameterTypes();
-
+    public long populateTable() throws InstantiationException, IllegalAccessException, InvocationTargetException {
         long averageHashTime = 0;
         for (int i = 0; i < INSTANCE_AMOUNT; i++) {
-            Object[] paramValues = fillParameterArray(paramTypes);
-            averageHashTime += table.add(generateRandomInstance(paramValues));
+            averageHashTime += table.add(wekaRandomInstanceGenerator.nextRandom().getContents());
         }
+
         return averageHashTime / (long)INSTANCE_AMOUNT;
     }
-
-//    /**
-//     * Generates a randomized instance of a <code>T</code> object given a <code>Class<?>[]</code> of the parameter
-//     * types of the class <code>T</code>'s constructor
-//     * @param paramTypes an array of parameter types for <code>T</code>'s constructor
-//     *
-//     * @return a randomized instance of a <code>T</code> object
-//     */
-//    public T generateRandomInstance(Class<?>[] paramTypes) throws InstantiationException,
-//            IllegalAccessException, InvocationTargetException {
-//        // Todo: How to see if a variable is an int/double/boolean/ etc.
-//        // Todo: make recursive
-//        return generateRandomInstance(fillParameterArray(paramTypes));
-//    }
 
     public T generateRandomInstance(Object[] randomParams) throws InstantiationException,
             IllegalAccessException, InvocationTargetException {
 
         return (T)constructor.newInstance(randomParams);
-    }
-
-    /**
-     * Creates an <code>Object[]</code> of randomly instantiated <code>Object</code>s given a <code>Class<?>[]</code>.
-     *
-     * @param paramTypes
-     * @return
-     */
-    private Object[] fillParameterArray(Class<?>[] paramTypes) {
-        Object[] randomParams = new Object[paramTypes.length];
-
-        Instance inst = new DenseInstance(data.numAttributes());
-        for (int b = 0; b < randomParams.length; b++) {
-            // Create the random parameter Object.
-            randomParams[b] = (new ParamBounds()).generate(parameterRanges[b*2], parameterRanges[b*2+1], paramTypes[b]);
-
-            Class<?> paramClass = randomParams[b].getClass();
-            if (paramClass.equals(boolean.class)) {
-                if ((boolean)randomParams[b]) {
-                    inst.setValue(b, 0);
-                } else {
-                    inst.setValue(b, 1);
-                }
-            } else if (paramClass.equals(String.class) || paramClass.equals(char.class)) {
-                inst.setValue(b, data.attribute(b).addStringValue((String)randomParams[b]));
-            } else {
-                inst.setValue(b, (double)randomParams[b]);
-            }
-        }
-
-        return randomParams;
     }
 
     /**
@@ -134,13 +86,13 @@ public class HashAnalyzerPro<T> {
     public String avalancheEffectAnalysis() throws IllegalAccessException, InvocationTargetException,
             InstantiationException {
         String result = "";
-        Class<?>[] paramTypes = constructor.getParameterTypes();
 
+        wekaRandomInstanceGenerator.clearData();
         for (int a = 0; a < INSTANCE_AMOUNT; a++) {
+            WekaRandomInstance<T> wekaRandomInstance = wekaRandomInstanceGenerator.nextRandom();
+            T randomInstance = wekaRandomInstance.getContents();
             // create the random parameters we will use to instantiate on this iteration
-            Object[] randomParams = fillParameterArray(paramTypes);
-            // instantiate a T Object using randomParams as the parameters for the constructor
-            T randomInstance = generateRandomInstance(randomParams);
+            Object[] randomParams = wekaRandomInstance.getParameterValues();
 
             int originalHash = randomInstance.hashCode();
             Object[] paramsCopy = randomParams;

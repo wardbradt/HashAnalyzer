@@ -7,7 +7,7 @@ import java.util.Random;
  * https://stackoverflow.com/questions/4936819/java-check-if-enum-contains-a-given-string
  * https://stackoverflow.com/questions/10189016/generate-short-random-number-in-java
  */
-public class RandomGenerator {
+public class RecursiveRandomGenerator {
 
     public enum BASE_TYPE {
         INTEGER (int.class, Integer.class),
@@ -76,30 +76,6 @@ public class RandomGenerator {
             return baseType;
         }
     }
-
-//    public static final List<Class<?>> WRAPPER_TYPES = new ArrayList<Class<?>>() {{
-//        for (BASE_TYPE b : BASE_TYPE.values()) {
-//            add(b.getWrapperClass());
-//        }
-//    }};
-//
-//    public static final List<Class<?>> WRAPPER_ARRAY_TYPES = new ArrayList<Class<?>>() {{
-//        for (BASE_TYPE_ARRAY b : BASE_TYPE_ARRAY.values()) {
-//            add(b.getWrapperArrayClass());
-//        }
-//    }};
-//
-//    public static final List<Class<?>> PRIMITIVE_TYPES = new ArrayList<Class<?>>() {{
-//        for (BASE_TYPE b : BASE_TYPE.values()) {
-//            add(b.getPrimitiveClass());
-//        }
-//    }};
-//
-//    public static final List<Class<?>> PRIMITIVE_ARRAY_TYPES = new ArrayList<Class<?>>() {{
-//        for (BASE_TYPE_ARRAY b : BASE_TYPE_ARRAY.values()) {
-//            add(b.getPrimitiveArrayClass());
-//        }
-//    }};
 
     public static Object nextRandom(Class<?> cls) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         // base case: primitive array or wrapper array
@@ -216,9 +192,4 @@ public class RandomGenerator {
 //    public static boolean isPrimitive(Class<?> cls) {
 //        return PRIMITIVE_TYPES.contains(cls);
 //    }
-    
-    public static void main(String[] args) throws IllegalAccessException, InstantiationException, InvocationTargetException {
-        // I don't fully know how to use @SuppressWarnings yet, so most of my methods throw these exceptions^
-        String str = (String)nextRandom(String.class);
-    }
 }

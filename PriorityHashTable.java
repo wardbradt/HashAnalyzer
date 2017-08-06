@@ -10,6 +10,11 @@ public class PriorityHashTable<T> {
         queue = new PriorityQueue<>();
     }
 
+    /**
+     *
+     * @param list
+     * @return
+     */
     public long add(HashLinkedList<T> list) {
         // Need an object to hash
         T obj = list.getContents();
@@ -51,37 +56,7 @@ public class PriorityHashTable<T> {
      * @return the time (in nanoseconds) it takes to hash T obj
      */
     public long add(T obj) {
-        if (queue.isEmpty()) {
-            queue.add(new HashLinkedList<T>(obj));
-            long startTime = System.nanoTime();
-            obj.hashCode();
-            return System.nanoTime() - startTime;
-        }
-        // For iteration
-        PriorityQueue<HashLinkedList<T>> copy = new PriorityQueue<>();
-
-        long startTime = System.nanoTime();
-        int hashed = obj.hashCode();
-        startTime = System.nanoTime() - startTime;
-
-        while (queue.size() > 0) {
-            if (queue.peek().getContents().hashCode() != hashed) {
-                copy.add(queue.poll());
-            }
-            // if obj belongs in the HLL we have iterated to
-            else {
-                queue.peek().add(obj);
-                break;
-            }
-        }
-
-        // if hashed is not yet in queue.
-        if (queue.isEmpty()) {
-            queue.add(new HashLinkedList<T>(obj));
-        }
-
-        queue.addAll(copy);
-        return startTime;
+        return add(new HashLinkedList<>(obj));
     }
 
     public long add(T obj, boolean k) {
