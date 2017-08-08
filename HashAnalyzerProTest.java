@@ -124,4 +124,16 @@ public class HashAnalyzerProTest {
 
         tester.hashReport();
     }
+
+    @Test
+    public void testStandardDeviation() {
+        // example taken from http://www.mathsisfun.com/data/standard-deviation.html
+        int[] numbers = new int[5];
+        numbers[0] = 600;
+        numbers[1] = 470;
+        numbers[2] = 170;
+        numbers[3] = 430;
+        numbers[4] = 300;
+        assertEquals(147, (int)HashAnalyzerPro.standardDeviation(numbers));
+    }
 }

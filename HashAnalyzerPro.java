@@ -1,3 +1,4 @@
+//import java.io.IOException;
 import java.lang.reflect.*;
 import java.util.*;
 import weka.core.*;
@@ -10,13 +11,11 @@ public class HashAnalyzerPro<T> {
     private final int INSTANCE_AMOUNT = 1024;
     private Constructor constructor;
     private int[] parameterRanges;
-    private ArrayList<Attribute> attributes;
     private WekaRandomInstanceGenerator<T> wekaRandomInstanceGenerator;
 
     public HashAnalyzerPro(Class c, int[] r) {
         table = new PriorityHashTable<>();
         constructor = c.getConstructors()[0];
-        attributes = createAttributes(constructor.getParameterTypes());
         wekaRandomInstanceGenerator = new WekaRandomInstanceGenerator<>(c, r);
         parameterRanges = r;
     }
@@ -88,35 +87,58 @@ public class HashAnalyzerPro<T> {
         String result = "";
 
         wekaRandomInstanceGenerator.clearData();
+        Double[] instanceHashes = new Double[INSTANCE_AMOUNT];
+        // the standard deviations of the average standard deviations of changing each parameter
+        Double[] parameterAlterationStdDev = new Double[wekaRandomInstanceGenerator.getConstructor().getParameterCount()]
         for (int a = 0; a < INSTANCE_AMOUNT; a++) {
             WekaRandomInstance<T> wekaRandomInstance = wekaRandomInstanceGenerator.nextRandom();
             T randomInstance = wekaRandomInstance.getContents();
-            // create the random parameters we will use to instantiate on this iteration
-            Object[] randomParams = wekaRandomInstance.getParameterValues();
+            // the random parameters we will use to instantiate on this iteration
+            Object[] instanceParams = wekaRandomInstance.getParameterValues();
 
-            int originalHash = randomInstance.hashCode();
-            Object[] paramsCopy = randomParams;
-            Object objCopy = new Object();
+            Instance denseInstance = wekaRandomInstance.getInstance();
+            int originalHash = (int)denseInstance.value(denseInstance.numAttributes()-1);
+            Object[] paramsCopy = instanceParams;
+            Object objCopy = randomInstance;
             int prev = originalHash;
 
-            // Iterate over the parameters that were used to construct/ initialize randomInstance
-            for (int b = 0; b < randomParams.length; b++) {
-                // an array of Objects that are slightly different from randomParams[b] (or each random parameter)
-                Object[] alteredParameters = differentiateParameter(randomParams[b]);
-                int[] sums = new int[randomParams.length];
+            // the standard deviations of changing each parameter used to construct randomInstance
+            Double[] instanceParamsStdDev = new Double[instanceParams.length];
+            // Iterate over the parameters that were used to construct randomInstance
+            for (int b = 0; b < instanceParams.length; b++) {
+                // an array of objects that are slightly different from instanceParams[b] (each random parameter)
+                Object[] alteredParameters = differentiateParameter(instanceParams[b]);
 
-                // Iterate over the differentiated parameters
+                // an array that will store the hashes of each object where a particular parameter (the one at
+                // instanceParams[b]) is changed slightly
+                Integer[] alteredParametersHashes = new Integer[alteredParameters.length];
+                // Iterate over the altered parameters to add objects with slightly different values for
+                // instanceParams[b] to wekaRandomInstanceGenerator
                 for (int c = 0; c < alteredParameters.length; c++) {
                     paramsCopy[b] = alteredParameters[c];
+                    // create a new instance with the altered parameter
+                    WekaRandomInstance<T> differentiatedInstance = new WekaRandomInstance<T>(constructor, paramsCopy, wekaRandomInstanceGenerator.getData());
+                    alteredParametersHashes[c] = (Integer)(int)differentiatedInstance.getInstance().value(differentiatedInstance.getInstance().numAttributes()-1);
+                    wekaRandomInstanceGenerator.addToData(differentiatedInstance.getInstance());
                 }
+                instanceParamsStdDev[b] = standardDeviation(alteredParametersHashes);
+                // reset the altered parameter for the next iteration over instanceParams
+                paramsCopy[b] = instanceParams[b];
             }
+            for (int c = 0; c < parameterAlterationStdDev.length; c++) {
+                parameterAlterationStdDev[c] += instanceParamsStdDev[c];
+            }
+            instanceHashes[a] = standardDeviation(instanceParamsStdDev);
         }
+        for (int i = 0; i < parameterAlterationStdDev.length; i++) {
+            parameterAlterationStdDev[i] /= INSTANCE_AMOUNT;
+        }
+
         return result;
     }
 
     /**
      * Returns an array of objects that are slightly differentiated/ altered from obj.
-     * Todo: Make recursive to instantiate any object until you get to its primitive constructor(s)
      * Todo: Revise this method if you don't end up making it recursive
      * @param obj the object you would like to be changed
      * @param <T>
@@ -243,6 +265,27 @@ public class HashAnalyzerPro<T> {
         result.add(new Attribute("hashcode"));
 
         return result;
+    }
+
+    /**
+     * Calculates the standard deviation of an array of <code>int</code>s
+     * @param arr an array of <code>int</code>s
+     * @return standard deviation of the <code>int</code>s in arr
+     */
+    public static double standardDeviation(Number[] arr) {
+        double mean = 0;
+        for (int i = 0; i < arr.length; i++) {
+            mean += (double)arr[i];
+        }
+        mean /= arr.length;
+        double secondMean = 0;
+        for (int i = 0; i < arr.length; i++) {
+            secondMean += Math.pow((double)arr[i] - mean, 2);
+        }
+        secondMean /= arr.length;
+        secondMean = Math.sqrt(secondMean);
+
+        return secondMean;
     }
 
     /**

@@ -30,10 +30,17 @@ public class WekaRandomInstanceGenerator<T> {
         // initialize attributes and data
         attributes = createAttributes(constructor.getParameterTypes());
         data = new Instances("MyRelation", attributes, 0);
-        // later: is this line necessary?
+        // todo later: is this line necessary?
         data.setClassIndex(data.numAttributes() - 1);
     }
 
+    /**
+     * Creates and returns a new <code>WekaRandomInstance</code>, adds it to <code>data</code>, and returns it
+     * @return a <code>WekaRandomInstance<T></code>
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     * @throws InstantiationException
+     */
     public WekaRandomInstance<T> nextRandom() throws IllegalAccessException, InvocationTargetException, InstantiationException {
         WekaRandomInstance<T> added = new WekaRandomInstance<T>(cls, parameterRanges, data);
         data.add(added.getInstance());
@@ -78,12 +85,20 @@ public class WekaRandomInstanceGenerator<T> {
         writer.close();
     }
 
+    public void addToData(Instance inst) {
+        data.add(inst);
+    }
+
     public ArrayList<Attribute> getAttributes() {
         return attributes;
     }
 
     public Instances getData() {
         return data;
+    }
+
+    public Constructor getConstructor() {
+        return constructor;
     }
 
     public void clearData() {
