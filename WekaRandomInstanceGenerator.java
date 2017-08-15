@@ -24,47 +24,47 @@ public class WekaRandomInstanceGenerator<T> {
 
     public WekaRandomInstanceGenerator(Class<?> cls, int[] ranges) {
         this.cls = cls;
-        constructor = cls.getConstructors()[0];
+        this.constructor = cls.getConstructors()[0];
         this.parameterRanges = ranges;
 
         // initialize attributes and data
-        attributes = createAttributes(constructor.getParameterTypes());
+        createAttributes();
         data = new Instances("MyRelation", attributes, 0);
-        // later: is this line necessary?
+        // todo later: is this line necessary?
         data.setClassIndex(data.numAttributes() - 1);
     }
 
+    /**
+     * Creates and returns a new <code>WekaRandomInstance</code>, adds it to <code>data</code>, and returns it
+     * @return a <code>WekaRandomInstance<T></code>
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     * @throws InstantiationException
+     */
     public WekaRandomInstance<T> nextRandom() throws IllegalAccessException, InvocationTargetException, InstantiationException {
         WekaRandomInstance<T> added = new WekaRandomInstance<T>(cls, parameterRanges, data);
         data.add(added.getInstance());
         return added;
     }
-
-    /**
-     * Generates an <code>ArrayList<Attribute></code> for the parameters of a constructor.
-     * @param arr an <code>Class<?>[]</code> representing the classes of the Objects in a constructor's parameter list
-     *
-     * @return
-     */
-    public static ArrayList<Attribute> createAttributes(Class<?>[] arr) {
-        ArrayList<Attribute> result = new ArrayList<>();
-        for (int i = 0; i < arr.length; i++) {
+    
+    private void createAttributes() {
+        attributes = new ArrayList<>();
+        Class<?>[] parameterTypes = constructor.getParameterTypes();
+        for (int i = 0; i < parameterTypes.length; i++) {
             // boolean == only primitive nominal attribute
-            if (arr[i].equals(boolean.class)) {
-                result.add(new Attribute("att" + i, BOOLEAN_NAMES));
+            if (parameterTypes[i].equals(boolean.class)) {
+                attributes.add(new Attribute("att" + i, BOOLEAN_NAMES));
             }
             // char and string == string attribute
-            else if (arr[i].equals(String.class) || arr[i].equals(char.class)) {
-                result.add(new Attribute("att" + i, true));
+            else if (parameterTypes[i].equals(String.class) || parameterTypes[i].equals(char.class)) {
+                attributes.add(new Attribute("att" + i, true));
             }
             // int, double, float, long, short, or byte == numeric attribute
             else {
-                result.add(new Attribute("att" + i));
+                attributes.add(new Attribute("att" + i));
             }
         }
-        result.add(new Attribute("hashcode"));
-
-        return result;
+        attributes.add(new Attribute("hashcode"));
     }
 
     public void instancesToArff() throws IOException {
@@ -78,12 +78,20 @@ public class WekaRandomInstanceGenerator<T> {
         writer.close();
     }
 
+    public void addToData(Instance inst) {
+        data.add(inst);
+    }
+
     public ArrayList<Attribute> getAttributes() {
         return attributes;
     }
 
     public Instances getData() {
         return data;
+    }
+
+    public Constructor getConstructor() {
+        return constructor;
     }
 
     public void clearData() {

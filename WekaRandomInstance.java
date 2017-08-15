@@ -3,30 +3,27 @@ import weka.core.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+// todo later make this a subclass of DenseInstance or AbstractInstance instead of having an Instance variable
 public class WekaRandomInstance<T> {
     private T contents;
     private Object[] parameterValues;
-    private Constructor constructor;
-    private int[] parameterRanges;
+    private Constructor<?> constructor;
     private Instance instance;
 
     public WekaRandomInstance(Class<?> cls, int[] ranges, Instances dataSet) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-        constructor = cls.getConstructors()[0];
-        parameterRanges = ranges;
+        this(cls.getConstructors()[0], fillParameterArray(cls.getConstructors()[0].getParameterTypes(), ranges), dataSet);
+    }
+
+    public WekaRandomInstance(Constructor<?> constructor, Object[] parameterValues, Instances dataSet) throws IllegalAccessException, InstantiationException, InvocationTargetException {
+        this.constructor = constructor;
+        this.parameterValues = parameterValues;
         instance = new DenseInstance(constructor.getParameterCount() + 1);
         instance.setDataset(dataSet);
         init();
     }
 
     private void init() throws IllegalAccessException, InvocationTargetException, InstantiationException {
-        Class<?>[] parameterTypes = constructor.getParameterTypes();
-        parameterValues = fillParameterArray(parameterTypes);
-
         for (int b = 0; b < parameterValues.length; b++) {
-            // Create the random parameter Object.
-            parameterValues[b] = (new ParamBounds()).generate(parameterRanges[b*2], parameterRanges[b*2+1],
-                    parameterTypes[b]);
-
             Class<?> paramClass = parameterValues[b].getClass();
             if (paramClass.equals(boolean.class)) {
                 if ((boolean)parameterValues[b]) {
@@ -37,7 +34,7 @@ public class WekaRandomInstance<T> {
             } else if (paramClass.equals(String.class) || paramClass.equals(char.class)) {
                 instance.setValue(b, (String)parameterValues[b]);
             } else {
-                instance.setValue(b, (double)(int)parameterValues[b]);
+                instance.setValue(b, ((Number)parameterValues[b]).doubleValue());
             }
         }
 
@@ -53,7 +50,7 @@ public class WekaRandomInstance<T> {
      * @param paramTypes
      * @return
      */
-    private Object[] fillParameterArray(Class<?>[] paramTypes) {
+    public static Object[] fillParameterArray(Class<?>[] paramTypes, int[] parameterRanges) {
         Object[] randomParams = new Object[paramTypes.length];
 
         for (int b = 0; b < randomParams.length; b++) {

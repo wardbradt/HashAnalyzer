@@ -10,11 +10,6 @@ public class PriorityHashTable<T> {
         queue = new PriorityQueue<>();
     }
 
-    /**
-     *
-     * @param list
-     * @return
-     */
     public long add(HashLinkedList<T> list) {
         // Need an object to hash
         T obj = list.getContents();

@@ -3,6 +3,13 @@
  */
 import java.util.*;
 
+/**
+ * A wrapper class of sorts for a traditional <code>LinkedList</code> that is typically to be used for data analysis
+ * of hash functions. Every <code>Object</code> in a <code>HashLinkedList</code> must have the same output for its
+ * <code>hashcode()</code> function
+ *
+ * @param <T> any <code>Object</code> that can be hashed using a <code>hashcode()</code> function
+ */
 public class HashLinkedList<T> implements Comparable<HashLinkedList<T>>, Iterable<T> {
     private T contents;
     private HashLinkedList<T> next;
@@ -117,89 +124,6 @@ public class HashLinkedList<T> implements Comparable<HashLinkedList<T>>, Iterabl
         };
         return it;
     }
-
-//    private class Itr implements Iterator<T> {
-//        int cursor;
-//        int lastRet = -1;
-//
-//        @Override
-//        public boolean hasNext() {
-//            return false;
-//        }
-//
-//        @Override
-//        @SuppressWarnings("unchecked")
-//        public T next() {
-//            int i = cursor;
-//            if (i >= size())
-//                throw new NoSuchElementException();
-//            Object[] elementData = HashLinkedList.this.elementData;
-//            if (i >= elementData.length)
-//                throw new ConcurrentModificationException();
-//            cursor = i + 1;
-//            return (T) elementData[lastRet = i];
-//        }
-//    }
-
-//    public ListIterator<T> listIterator(int index) {
-//        ListIterator<T> itr = new ListIterator<T>() {
-//            int cursor;
-//            @Override
-//            public boolean hasNext() {
-//                return contents != null;
-//            }
-//
-//            @Override
-//            public T next() {
-//                if (contents == null) throw new NoSuchElementException("No more elements!");
-//                T popped = contents;
-//                if (next == null) {
-//                    contents = null;
-//                } else {
-//                    contents = next.contents;
-//                    next = next.next;
-//                }
-//                return popped;
-//            }
-//
-//            @Override
-//            public boolean hasPrevious() {
-//                return false;
-//            }
-//
-//            @Override
-//            public T previous() {
-//                return null;
-//            }
-//
-//            @Override
-//            public int nextIndex() {
-//                return 0;
-//            }
-//
-//            @Override
-//            public int previousIndex() {
-//                return 0;
-//            }
-//
-//            @Override
-//            public void remove() {
-//                throw new UnsupportedOperationException();
-//            }
-//
-//            @Override
-//            public void set(T t) {
-//                throw new UnsupportedOperationException();
-//            }
-//
-//            @Override
-//            public void add(T t) {
-//
-//            }
-//        };
-//        return itr;
-//    }
-
     /**
      * Compares which <code>HashLinkedList</code> has more elements
      * @param other another <code>HashLinkedList</code> to be compared to <code>this</code>
