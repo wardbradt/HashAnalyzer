@@ -34,7 +34,7 @@ public class WekaRandomInstance<T> {
             } else if (paramClass.equals(String.class) || paramClass.equals(char.class)) {
                 instance.setValue(b, (String)parameterValues[b]);
             } else {
-                instance.setValue(b, (double)(int)parameterValues[b]);
+                instance.setValue(b, ((Number)parameterValues[b]).doubleValue());
             }
         }
 

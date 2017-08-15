@@ -1,5 +1,9 @@
 import org.junit.Test;
+import testclasses.DumbClass;
+
 import static org.junit.Assert.*;
+
+import java.io.IOException;
 import java.util.*;
 import java.lang.reflect.*;
 
@@ -104,31 +108,22 @@ public class HashAnalyzerProTest {
 //    }
 
     @Test
-    public void testViewHashReport() throws IllegalAccessException, InstantiationException, InvocationTargetException {
-//        PriorityHashTable<Integer> heatMapTester = new PriorityHashTable<>();
-//        heatMapTester.add(5);
-//        heatMapTester.add(4);
-//        heatMapTester.add(8);
-//        heatMapTester.add(12);
-//        heatMapTester.add(14);
-//        heatMapTester.add(5);
-//        heatMapTester.add(5);
-//        heatMapTester.add(4);
-//        heatMapTester.add(32);
-//        heatMapTester.add(4);
-//        heatMapTester.add(16);
-//        heatMapTester.add(12);
-//        heatMapTester.add(15);
-
-        HashAnalyzerPro<Integer> tester = new HashAnalyzerPro<>(Integer.class, new int[]{10,30});
-
+    public void testViewHashReport() throws IllegalAccessException, InstantiationException, InvocationTargetException, IOException {
+//        HashAnalyzerPro<Integer> tester = new HashAnalyzerPro<>(Integer.class, new int[]{10,30});
+        HashAnalyzerPro<DumbClass> tester = new HashAnalyzerPro<>(DumbClass.class, new int[]{1,10, 10, 20, 50, 70});
         tester.hashReport();
+    }
+
+    @Test
+    public void testAvalancheEffectAnalysis() throws IllegalAccessException, InstantiationException, InvocationTargetException, IOException {
+        HashAnalyzerPro<DumbClass> tester = new HashAnalyzerPro<>(DumbClass.class, new int[]{10,30, 90, 200, 50, 700});
+        tester.avalancheEffectAnalysis();
     }
 
     @Test
     public void testStandardDeviation() {
         // example taken from http://www.mathsisfun.com/data/standard-deviation.html
-        int[] numbers = new int[5];
+        Integer[] numbers = new Integer[5];
         numbers[0] = 600;
         numbers[1] = 470;
         numbers[2] = 170;

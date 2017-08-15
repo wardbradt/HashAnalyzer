@@ -1,14 +1,13 @@
-//import java.io.IOException;
+import java.io.IOException;
 import java.lang.reflect.*;
 import java.util.*;
-import weka.core.*;
 
 /**
  * Created by wardbradt on 7/9/17.
  */
 public class HashAnalyzerPro<T> {
     private PriorityHashTable<T> table;
-    private final int INSTANCE_AMOUNT = 1024;
+    private final int INSTANCE_AMOUNT = 64;
     private Constructor constructor;
     private int[] parameterRanges;
     private WekaRandomInstanceGenerator<T> wekaRandomInstanceGenerator;
@@ -20,10 +19,11 @@ public class HashAnalyzerPro<T> {
         parameterRanges = r;
     }
 
-    public void hashReport() throws IllegalAccessException, InvocationTargetException, InstantiationException {
+    public void hashReport() throws IllegalAccessException, InvocationTargetException, InstantiationException, IOException {
         System.out.println("The average hashCode() runtime of an arbitrary " +
                 constructor.getDeclaringClass().getSimpleName()  + " " +
                 "object is " + populateTable() + " nanoseconds.\n");
+        wekaRandomInstanceGenerator.instancesToArff();
         System.out.println(heatMap());
     }
 
@@ -83,56 +83,52 @@ public class HashAnalyzerPro<T> {
      * @return a String describing an an analysis of the given class's avalanche effect or lack thereof
      */
     public String avalancheEffectAnalysis() throws IllegalAccessException, InvocationTargetException,
-            InstantiationException {
+            InstantiationException, IOException {
         String result = "";
 
         wekaRandomInstanceGenerator.clearData();
+        // each element is the simplified/ general standard deviation when minutely changing each parameter used to
+        // construct randomInstance
         Double[] instanceHashes = new Double[INSTANCE_AMOUNT];
-        // the standard deviations of the average standard deviations of changing each parameter
-        Double[] parameterAlterationStdDev = new Double[wekaRandomInstanceGenerator.getConstructor().getParameterCount()]
+        // advanced: stores the standard deviation of the hashcode when changing each parameter on each iteration
+        Double[][]parameterAlterationStdDev = new Double[wekaRandomInstanceGenerator.getConstructor().getParameterCount()][INSTANCE_AMOUNT];
         for (int a = 0; a < INSTANCE_AMOUNT; a++) {
             WekaRandomInstance<T> wekaRandomInstance = wekaRandomInstanceGenerator.nextRandom();
-            T randomInstance = wekaRandomInstance.getContents();
             // the random parameters we will use to instantiate on this iteration
             Object[] instanceParams = wekaRandomInstance.getParameterValues();
-
-            Instance denseInstance = wekaRandomInstance.getInstance();
-            int originalHash = (int)denseInstance.value(denseInstance.numAttributes()-1);
-            Object[] paramsCopy = instanceParams;
-            Object objCopy = randomInstance;
-            int prev = originalHash;
-
-            // the standard deviations of changing each parameter used to construct randomInstance
+            // the standard deviations of the hash for each altered parameter used to construct randomInstance on this iteration
             Double[] instanceParamsStdDev = new Double[instanceParams.length];
             // Iterate over the parameters that were used to construct randomInstance
             for (int b = 0; b < instanceParams.length; b++) {
                 // an array of objects that are slightly different from instanceParams[b] (each random parameter)
                 Object[] alteredParameters = differentiateParameter(instanceParams[b]);
 
-                // an array that will store the hashes of each object where a particular parameter (the one at
+                // temp var: an array that will store the hashes of each object when a particular parameter (the one at
                 // instanceParams[b]) is changed slightly
-                Integer[] alteredParametersHashes = new Integer[alteredParameters.length];
+                Integer[] alteredParametersHashes = new Integer[alteredParameters.length + 1];
+                alteredParametersHashes[alteredParametersHashes.length - 1] = (Integer)(int)wekaRandomInstance.getInstance().value(wekaRandomInstance.getInstance().numAttributes()-1);
+                Object instanceParamsBTemp = instanceParams[b];
                 // Iterate over the altered parameters to add objects with slightly different values for
-                // instanceParams[b] to wekaRandomInstanceGenerator
+                // instanceParams[b] to wekaRandomInstanceGenerator and alteredParametersHashes
                 for (int c = 0; c < alteredParameters.length; c++) {
-                    paramsCopy[b] = alteredParameters[c];
+                    instanceParams[b] = alteredParameters[c];
                     // create a new instance with the altered parameter
-                    WekaRandomInstance<T> differentiatedInstance = new WekaRandomInstance<T>(constructor, paramsCopy, wekaRandomInstanceGenerator.getData());
+                    WekaRandomInstance<T> differentiatedInstance = new WekaRandomInstance<T>(constructor, instanceParams, wekaRandomInstanceGenerator.getData());
                     alteredParametersHashes[c] = (Integer)(int)differentiatedInstance.getInstance().value(differentiatedInstance.getInstance().numAttributes()-1);
                     wekaRandomInstanceGenerator.addToData(differentiatedInstance.getInstance());
                 }
-                instanceParamsStdDev[b] = standardDeviation(alteredParametersHashes);
+                parameterAlterationStdDev[b][a] = standardDeviation(alteredParametersHashes);
+                instanceParamsStdDev[b] = parameterAlterationStdDev[b][a];
                 // reset the altered parameter for the next iteration over instanceParams
-                paramsCopy[b] = instanceParams[b];
-            }
-            for (int c = 0; c < parameterAlterationStdDev.length; c++) {
-                parameterAlterationStdDev[c] += instanceParamsStdDev[c];
+                instanceParams[b] = instanceParamsBTemp;
             }
             instanceHashes[a] = standardDeviation(instanceParamsStdDev);
         }
-        for (int i = 0; i < parameterAlterationStdDev.length; i++) {
-            parameterAlterationStdDev[i] /= INSTANCE_AMOUNT;
+        Double[] parameterHashStdDev = new Double[parameterAlterationStdDev.length];
+        for (int i = 0; i < parameterHashStdDev.length; i++) {
+            parameterHashStdDev[i] = standardDeviation(parameterAlterationStdDev[i]);
         }
+        wekaRandomInstanceGenerator.instancesToArff();
 
         return result;
     }
@@ -233,41 +229,6 @@ public class HashAnalyzerPro<T> {
     }
 
     /**
-     * Creates an <code>ArrayList<Attribute></code> given a <code>Class<?>[]</code>
-     * @param arr an <code>Class<?>[]</code> filled with the <code>class</code> types of parameters of a constructor
-     *
-     * @return an <code>ArrayList<Attribute></code> given a <code>Class<?>[]</code>
-     */
-    public static ArrayList<Attribute> createAttributes(Class<?>[] arr) {
-        ArrayList<Attribute> result = new ArrayList<>();
-
-        for (int i = 0; i < arr.length; i++) {
-            Class<?> objClass = arr[i].getClass();
-            // boolean == only primitive nominal attribute
-            if (objClass.equals(boolean.class)) {
-                ArrayList<String> booleanNames = new ArrayList<>();
-                booleanNames.add("true");
-                booleanNames.add("false");
-                result.add(new Attribute("att" + i, booleanNames));
-                break;
-            }
-            // char and string == string attribute
-            else if (objClass.equals(String.class) || objClass.equals(char.class)) {
-                result.add(new Attribute("att" + i, (ArrayList<String>) null));
-                break;
-            }
-            // int, double, float, long, short, or byte == numeric attribute
-            else {
-                result.add(new Attribute("att" + i));
-            }
-            throw new IllegalArgumentException();
-        }
-        result.add(new Attribute("hashcode"));
-
-        return result;
-    }
-
-    /**
      * Calculates the standard deviation of an array of <code>int</code>s
      * @param arr an array of <code>int</code>s
      * @return standard deviation of the <code>int</code>s in arr
@@ -275,12 +236,12 @@ public class HashAnalyzerPro<T> {
     public static double standardDeviation(Number[] arr) {
         double mean = 0;
         for (int i = 0; i < arr.length; i++) {
-            mean += (double)arr[i];
+            mean += arr[i].doubleValue();
         }
         mean /= arr.length;
         double secondMean = 0;
         for (int i = 0; i < arr.length; i++) {
-            secondMean += Math.pow((double)arr[i] - mean, 2);
+            secondMean += Math.pow(arr[i].doubleValue() - mean, 2);
         }
         secondMean /= arr.length;
         secondMean = Math.sqrt(secondMean);
