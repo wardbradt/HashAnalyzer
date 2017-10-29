@@ -106,7 +106,7 @@ public class RecursiveRandomGenerator {
         for (int i = 0; i < parameterValues.length; i++) {
             // Recursively creates objects/ parameters for constructor
             parameterValues[i] = nextRandom(parameterTypes[i]);
-            System.out.println(parameterValues[i].getClass());
+//            System.out.println(parameterValues[i].getClass());
         }
 
         return constructor.newInstance(parameterValues);
